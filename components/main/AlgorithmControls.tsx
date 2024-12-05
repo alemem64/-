@@ -48,12 +48,12 @@ export default function AlgorithmControls({
     <div className="flex items-center space-x-2">
       <Select
         value={algorithmName}
-        onValueChange={(value) => handleAlgorithmChange(algo.id, value)}>
+        onValueChange={(value: any) => handleAlgorithmChange(algo.id, value)}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select algorithm" />
         </SelectTrigger>
         <SelectContent>
-          {algorithmTypes.map((algoType) => (
+          {algorithmTypes.map((algoType: string) => (
             <SelectItem key={algoType} value={algoType}>
               {algoType.charAt(0).toUpperCase() + algoType.slice(1)}
             </SelectItem>
@@ -63,7 +63,7 @@ export default function AlgorithmControls({
       <Input
         placeholder="Search pattern"
         value={algo.algorithm ? algo.algorithm.pattern : ""}
-        onChange={(e) => {
+        onChange={(e: any) => {
           if (algo.algorithm) {
             algo.algorithm.setPattern(e.target.value);
             updateAlgorithm(algo.id, { algorithm: algo.algorithm });

@@ -9,12 +9,12 @@ export default function TextDisplay({
 }) {
   return (
     <div className="mb-4 p-4 border rounded-lg bg-gray-50 min-h-[200px] relative font-mono">
-      {text.split("").map((char, index) => {
+      {text.split("").map((char: string, index: number) => {
         // Collect highlights and current indices
         const highlightStyles: { backgroundColor: any }[] = [];
         const markerStyles: { borderBottom: string }[] = [];
 
-        algorithms.forEach((algo) => {
+        algorithms.forEach((algo: any) => {
           if (algo.algorithm) {
             // Check for highlights (matches found)
             algo.algorithm.highlights.forEach(

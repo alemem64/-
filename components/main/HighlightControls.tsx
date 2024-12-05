@@ -24,7 +24,7 @@ export default function HighlightControls({
       <Input
         type="number"
         value={highlight.start}
-        onChange={(e) =>
+        onChange={(e: any) =>
           updateHighlight(
             algoId,
             index,
@@ -38,7 +38,7 @@ export default function HighlightControls({
       <Input
         type="number"
         value={highlight.end}
-        onChange={(e) =>
+        onChange={(e: any) =>
           updateHighlight(
             algoId,
             index,

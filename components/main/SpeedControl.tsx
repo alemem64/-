@@ -14,7 +14,7 @@ export default function SpeedControl({
       <Input
         type="number"
         value={speed}
-        onChange={(e) => setSpeed(Math.max(10, parseInt(e.target.value)))}
+        onChange={(e: any) => setSpeed(Math.max(10, parseInt(e.target.value)))}
         className="w-[100px] mt-2"
       />
     </div>
