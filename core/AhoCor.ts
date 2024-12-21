@@ -17,15 +17,41 @@ export class AhoCorasickAlgorithm extends MyAlgorithm {
   private currentNode: TrieNode;
   private currentIndex: number;
 
+  // New: track whether we've built the trie + failure links
+  private isBuilt: boolean;
+
   constructor(text: string, patterns: string) {
     super("aho-corasick", text, ""); // Patterns are not stored in a single string
     this.root = new TrieNode();
     this.currentNode = this.root;
     this.currentIndex = 0;
 
-    const patternList = patterns.split(";");
+    // Initially, the trie is not built
+    this.isBuilt = false;
+
+    // Automatically build if patterns is not empty
+    if (patterns && patterns.trim() !== "") {
+      this.initializePatterns(patterns);
+    }
+  }
+
+  /**
+   * Build the trie & failure links from the semicolon-separated pattern string.
+   * Call this if you want to rebuild or build after the constructor.
+   */
+  public initializePatterns(patterns: string) {
+    // Clear out old root if you want to support re-initialization
+    this.root = new TrieNode();
+    this.currentNode = this.root;
+    this.currentIndex = 0;
+    this.isBuilt = false;
+
+    const patternList = patterns.split(";").map(p => p.trim());
     this.buildTrie(patternList);
     this.buildFailureLinks();
+
+    // Mark as built
+    this.isBuilt = true;
   }
 
   // Build the trie from the patterns
@@ -39,20 +65,21 @@ export class AhoCorasickAlgorithm extends MyAlgorithm {
         }
         node = node.children.get(char)!;
       }
-      node.outputs.push(pattern); // Add the pattern to the output of the last character
+      // Add the pattern to the output of the last character
+      node.outputs.push(pattern);
     }
   }
 
   // Build failure links for the trie
   private buildFailureLinks() {
     const queue: TrieNode[] = [];
-  
+
     // Set failure links for root's children
     for (const [char, child] of this.root.children.entries()) {
       child.failureLink = this.root;
       queue.push(child);
     }
-  
+
     while (queue.length > 0) {
       const node = queue.shift()!;
       for (const [char, child] of node.children.entries()) {
@@ -62,19 +89,23 @@ export class AhoCorasickAlgorithm extends MyAlgorithm {
           fallback = fallback.failureLink;
         }
         child.failureLink = fallback ? fallback.children.get(char)! : this.root;
-  
+
         // Merge outputs from the failure link
         if (child.failureLink) {
           child.outputs.push(...child.failureLink.outputs);
         }
-  
         queue.push(child);
       }
     }
   }
 
-  // Run the algorithm to find all matches
+  // Run the algorithm to find all matches at once
   runFullAlgorithm() {
+    if (!this.isBuilt) {
+      console.warn("Aho-Corasick trie is not built yet. Aborting runFullAlgorithm().");
+      return;
+    }
+
     this.resetHighlights();
     let node = this.root;
 
@@ -103,27 +134,49 @@ export class AhoCorasickAlgorithm extends MyAlgorithm {
     }
   }
 
-  // Step-by-step execution of the algorithm
+  public setPattern(patterns: string): void {
+    // 1) Store it in `this.pattern` for debugging or any base-class usage
+    super.setPattern(patterns);
+
+    // 2) Actually rebuild the trie 
+    //    (split on semicolon if user will type "ANA;BANANA", etc.)
+    if (patterns.trim() !== "") {
+      this.initializePatterns(patterns);
+    } else {
+      // If user clears the pattern input, maybe reset the trie
+      this.root = new TrieNode();
+      this.currentNode = this.root;
+      this.currentIndex = 0;
+      this.isBuilt = false;
+    }
+  }
+
   // Step-by-step execution of the algorithm
   step() {
+    // Guard: Check if the trie is built
+    if (!this.isBuilt) {
+      console.warn("Aho-Corasick trie is not built yet. Aborting step().");
+      return;
+    }
+
     if (this.currentIndex >= this.text.length) {
       console.warn("No more steps; reached the end of the text.");
       return;
     }
-  
+
     const char = this.text[this.currentIndex];
-  
+
     // Follow failure links on mismatch
     while (this.currentNode && !this.currentNode.children.has(char)) {
       console.log(`Mismatch at index ${this.currentIndex}, following failure link.`);
       this.currentNode = this.currentNode.failureLink!;
     }
-  
+
     if (this.currentNode) {
       // Move to the next node in the trie
       this.currentNode = this.currentNode.children.get(char)!;
       console.log(`Match for '${char}' at index ${this.currentIndex}, moving in trie.`);
-  
+
       // Check for matches at the current node
       for (const pattern of this.currentNode.outputs) {
         const start = this.currentIndex - pattern.length + 1;
@@ -136,7 +189,7 @@ export class AhoCorasickAlgorithm extends MyAlgorithm {
       console.log(`No match, resetting to root at index ${this.currentIndex}.`);
       this.currentNode = this.root;
     }
-  
+
     // Update the current index
     this.currentIndices[0] = this.currentIndex;
     this.currentIndex++;
@@ -144,11 +197,14 @@ export class AhoCorasickAlgorithm extends MyAlgorithm {
 
   resetState() {
     super.resetState();
+    // Reset the traversal node & index
     this.currentNode = this.root;
+    this.currentIndex = 0;
   }
 
+  // If text or pattern are empty, we consider it "complete" or trivially done
   isComplete(): boolean {
-    if (!this.pattern || !this.text) return true;
+    if (!this.text) return true;
     return this.currentIndex >= this.text.length;
   }
 }
