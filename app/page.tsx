@@ -12,6 +12,7 @@ import { MyAlgorithm } from "@/core/MyAlgorithm";
 import { NaiveAlgorithm } from "@/core/naive";
 import { AhoCorasickAlgorithm } from "@/core/AhoCor";
 import { BoyerMooreAlgorithm } from "@/core/BoyerMoore";
+import { KMPAlgorithm } from "@/core/KMP";
 
 export default function TextSearchSimulator() {
   const [text, setText] = useState("");
@@ -70,6 +71,9 @@ export default function TextSearchSimulator() {
         break;
       case "aho-corasick":
         newAlgorithm = new AhoCorasickAlgorithm(text, "pattern1;pattern2");
+        break;
+      case "kmp":
+        newAlgorithm = new KMPAlgorithm(text, "");
         break;
       default:
         newAlgorithm = null;
