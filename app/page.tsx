@@ -11,6 +11,7 @@ import { AlgorithmItem } from "@/types/type";
 import { MyAlgorithm } from "@/core/MyAlgorithm";
 import { NaiveAlgorithm } from "@/core/naive";
 import { AhoCorasickAlgorithm } from "@/core/AhoCor";
+import { BoyerMooreAlgorithm } from "@/core/BoyerMoore";
 
 export default function TextSearchSimulator() {
   const [text, setText] = useState("");
@@ -62,10 +63,13 @@ export default function TextSearchSimulator() {
 
     switch (value) {
       case "naive":
-        newAlgorithm = new NaiveAlgorithm(text, ""); // Pass current text
+        newAlgorithm = new NaiveAlgorithm(text, "");
+        break;
+      case "boyer-moore":
+        newAlgorithm = new BoyerMooreAlgorithm(text, "");
         break;
       case "aho-corasick":
-        newAlgorithm = new AhoCorasickAlgorithm(text, "pattern1;pattern2"); // Example patterns
+        newAlgorithm = new AhoCorasickAlgorithm(text, "pattern1;pattern2");
         break;
       default:
         newAlgorithm = null;
