@@ -40,4 +40,15 @@ export abstract class MyAlgorithm {
   resetState() {
     this.currentIndices = [];
   }
+
+  // 알고리즘이 완료되었는지 확인하는 메서드 추가
+  isComplete(): boolean {
+    return this.currentIndices.length >= this.text.length;
+  }
+
+  // 알고리즘을 처음부터 다시 시작
+  reset(): void {
+    this.currentIndices = [];
+    this.highlights = [];
+  }
 }

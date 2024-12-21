@@ -116,4 +116,9 @@ export class BoyerMooreAlgorithm extends MyAlgorithm {
     this.currentIndex = this.pattern.length - 1;
     this.buildBadCharTable();
   }
+
+  isComplete(): boolean {
+    if (!this.pattern || !this.text) return true;
+    return this.currentIndex >= this.text.length - this.pattern.length + 1;
+  }
 } 

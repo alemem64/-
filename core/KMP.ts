@@ -131,4 +131,9 @@ export class KMPAlgorithm extends MyAlgorithm {
     super.setPattern(pattern);
     this.failureTable = this.computeFailureTable(pattern);
   }
+
+  isComplete(): boolean {
+    if (!this.pattern || !this.text) return true;
+    return this.currentIndex >= this.text.length - this.pattern.length + 1;
+  }
 }

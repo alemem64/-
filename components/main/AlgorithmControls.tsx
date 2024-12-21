@@ -12,6 +12,13 @@ import { AlgorithmItem } from "@/types/type";
 
 const algorithmTypes = ["naive", "kmp", "boyer-moore", "aho-corasick"];
 
+const formatTime = (ms: number) => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const milliseconds = Math.floor((ms % 1000));
+  
+  return `${totalSeconds}.${milliseconds.toString().padStart(3, '0')}s`;
+};
+
 export default function AlgorithmControls({
   algo,
   updateAlgorithm,
@@ -45,7 +52,7 @@ export default function AlgorithmControls({
   };
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center gap-4">
       <Select
         value={algorithmName}
         onValueChange={(value: any) => handleAlgorithmChange(algo.id, value)}>
@@ -96,6 +103,9 @@ export default function AlgorithmControls({
         disabled={!algo.algorithm}>
         <Timer className="h-4 w-4" />
       </Button>
+      <div className="ml-2 font-mono text-sm">
+        {formatTime(algo.elapsedTime)}
+      </div>
     </div>
   );
 }

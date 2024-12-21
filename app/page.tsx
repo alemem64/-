@@ -13,6 +13,7 @@ import { NaiveAlgorithm } from "@/core/naive";
 import { AhoCorasickAlgorithm } from "@/core/AhoCor";
 import { BoyerMooreAlgorithm } from "@/core/BoyerMoore";
 import { KMPAlgorithm } from "@/core/KMP";
+import { Card } from "@/components/ui/card";
 
 export default function TextSearchSimulator() {
   const [text, setText] = useState("");
@@ -22,6 +23,8 @@ export default function TextSearchSimulator() {
       id: 1,
       algorithm: null,
       isRunning: false,
+      startTime: null,
+      elapsedTime: 0,
     },
   ]);
 
@@ -33,6 +36,8 @@ export default function TextSearchSimulator() {
         id: newId,
         algorithm: null,
         isRunning: false,
+        startTime: null,
+        elapsedTime: 0,
       },
     ]);
   };
@@ -53,9 +58,25 @@ export default function TextSearchSimulator() {
 
   const toggleAlgorithm = (id: number) => {
     setAlgorithms((prevAlgorithms) =>
-      prevAlgorithms.map((algo) =>
-        algo.id === id ? { ...algo, isRunning: !algo.isRunning } : algo
-      )
+      prevAlgorithms.map((algo) => {
+        if (algo.id === id) {
+          // 알고리즘이 완료된 상태에서는 시작하지 않음
+          if (!algo.isRunning && algo.algorithm?.isComplete()) {
+            return algo;
+          }
+          
+          const now = Date.now();
+          return {
+            ...algo,
+            isRunning: !algo.isRunning,
+            startTime: !algo.isRunning ? now : null,
+            elapsedTime: algo.isRunning && algo.startTime 
+              ? algo.elapsedTime + (now - algo.startTime)
+              : algo.elapsedTime
+          };
+        }
+        return algo;
+      })
     );
   };
 
@@ -79,7 +100,11 @@ export default function TextSearchSimulator() {
         newAlgorithm = null;
     }
 
-    updateAlgorithm(id, { algorithm: newAlgorithm });
+    updateAlgorithm(id, { 
+      algorithm: newAlgorithm,
+      startTime: null,
+      elapsedTime: 0 
+    });
   };
 
   // Update text in all algorithms when the text changes
@@ -93,6 +118,37 @@ export default function TextSearchSimulator() {
       })
     );
   }, [text]);
+
+  // 타이머 업데이트를 위한 useEffect 수정
+  useEffect(() => {
+    const timerInterval = setInterval(() => {
+      const now = Date.now();
+      setAlgorithms((prevAlgorithms) =>
+        prevAlgorithms.map((algo) => {
+          if (algo.isRunning && algo.startTime) {
+            // 알고리즘이 완료되었는지 확인
+            if (algo.algorithm?.isComplete()) {
+              return {
+                ...algo,
+                isRunning: false,
+                elapsedTime: algo.elapsedTime, // 현재 누적된 시간 유지
+                startTime: null,
+              };
+            }
+            // 시작 시간부터 현재까지의 경과 시간만 계산
+            return {
+              ...algo,
+              elapsedTime: algo.elapsedTime + (now - algo.startTime),
+              startTime: now, // 시작 시간 갱신
+            };
+          }
+          return algo;
+        })
+      );
+    }, 10); // 더 정확한 측정을 위해 10ms로 변경
+
+    return () => clearInterval(timerInterval);
+  }, []);
 
   // Main loop to step through algorithms
   useEffect(() => {
@@ -111,8 +167,25 @@ export default function TextSearchSimulator() {
     return () => clearInterval(interval);
   }, [speed]);
 
+  // 텍스트 크기를 계산하는 함수
+  const calculateSize = (text: string) => {
+    const bytes = new TextEncoder().encode(text).length;
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    } else if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(2)} KB`;
+    } else {
+      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+  };
+
   return (
     <div className="p-4 max-w-4xl mx-auto">
+      <Card className="p-2 mb-2 inline-block">
+        <span className="text-sm font-medium">
+          Size: {calculateSize(text)}
+        </span>
+      </Card>
       <Textarea
         className="mb-4"
         placeholder="Enter text to search..."

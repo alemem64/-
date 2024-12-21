@@ -68,4 +68,12 @@ export class NaiveAlgorithm extends MyAlgorithm {
     super.resetState();
     this.currentIndex = 0;
   }
+
+  isComplete(): boolean {
+    // 패턴이 비어있거나 텍스트가 비어있으면 완료로 간주
+    if (!this.pattern || !this.text) return true;
+    
+    // 현재 인덱스가 가능한 마지막 위치를 넘어섰으면 완료
+    return this.currentIndex > this.text.length - this.pattern.length;
+  }
 }

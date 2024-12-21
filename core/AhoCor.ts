@@ -146,4 +146,9 @@ export class AhoCorasickAlgorithm extends MyAlgorithm {
     super.resetState();
     this.currentNode = this.root;
   }
+
+  isComplete(): boolean {
+    if (!this.pattern || !this.text) return true;
+    return this.currentIndex >= this.text.length;
+  }
 }
